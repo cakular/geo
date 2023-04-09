@@ -7,7 +7,7 @@ let d = fs.readFileSync('./all.json');
 let json = JSON.parse(d);
 main();
 async function main() {
-    for (let i = 8070; i < json.length; i++) {
+    for (let i = 0; i < json.length; i++) {
         const image = json[i];
         if (!image) continue;
         getCountry(image.coordinates[0], image.coordinates[1], i);
@@ -16,14 +16,17 @@ async function main() {
 }
 async function getCountry(long, lat, index) {
     try {
-        if (Math.abs(lat) < 1e6) lat = 0;
+        if (Math.abs(lat) < 1e-6) lat = 0;
         let country = '';
         if (Math.abs(lat) < 1 && Math.abs(long) < 1) {
             country = 'null';
         } else {
-            const url = `https://api.geoapify.com/v1/geocode/reverse?lon=${long}&lat=${lat}&lang=en&apiKey=8923fefc90c24aa1bbe6bb22b302d39b `;
+            const url = `https://api.geoapify.com/v1/geocode/reverse?lon=${long}&lat=${lat}&lang=en&apiKey=8923fefc90c24aa1bbe6bb22b302d39b`;
             let response = await axios({ method: 'get', url: url });
             country = response.data.features[0]?.properties.country || 'null';
+            if (country == 'null') {
+                console.log(`${[lat, long]} is supposedly nowhere`);
+            }
         }
         fs.writeFileSync(`country/${index}.txt`, country);
     } catch (error) {
